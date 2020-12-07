@@ -4,12 +4,12 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
   TextInput,
   Modal,
   TouchableHighlight,
 } from "react-native";
-// import { Header } from "./component/Header";
+import axios from "axios";
+import DropDownPicker from "react-native-dropdown-picker";
 
 function Header() {
   return (
@@ -19,18 +19,38 @@ function Header() {
   );
 }
 
+async function SendData(price, amount) {
+  let dateObj = new Date();
+  let month = dateObj.getUTCMonth() + 1; //months from 1-12
+  let day = dateObj.getUTCDate();
+  let year = dateObj.getUTCFullYear();
+
+  const res = await axios
+    .post("localhost:3000/deal/create", {
+      date: `${year}-${month}-${day}`,
+      value: price,
+      amount: amount,
+    })
+    .then(console.log(res));
+
+  console.log(res);
+}
 
 export default function App() {
-  let flag = false;
   const [modalVisible, setModalVisible] = useState(false);
+  let [price, amount] = [null, null];
+  let pet = null;
+
   return (
     <View style={styles.container}>
       {Header()}
-      {/* <Transaction /> */}
+
       <View style={styles.menu}>
         <Text style={styles.titleText}>Bem vindo ao dogmeat Mobile!</Text>
         <StatusBar style="auto" />
         <Modal
+          display="flex"
+          alignContent="space-evenly"
           animationType="slide"
           transparent={true}
           visible={modalVisible}
@@ -44,15 +64,47 @@ export default function App() {
                 Por favor, digite os dados da transação
               </Text>
 
-              <TextInput style={styles.input}>preço</TextInput>
-              <TextInput style={styles.input}>
-                quantidade de ração comprada
-              </TextInput>
+              <TextInput
+                style={styles.input}
+                placeholder={"preço"}
+                onChangeText={(value) => {}}
+              ></TextInput>
+              <TextInput
+                style={styles.input}
+                placeholder={"quantidade de ração comprada"}
+                onChangeText={(value) => {
+                  amount = value;
+                }}
+              ></TextInput>
+
+              <DropDownPicker
+                items={[
+                  {
+                    label: "Bolinha",
+                    value: "usa",
+                  },
+                  {
+                    label: "Zeus",
+                    value: "uk",
+                  },
+                  {
+                    label: "Thor",
+                    value: "thosr",
+                  },
+                ]}
+                containerStyle={{ height: 40 }}
+                style={{ backgroundColor: "#fafafa" }}
+                onChangeItem={(item) => {
+                  pet = item;
+                }}
+              />
 
               <TouchableHighlight
                 style={{ ...styles.openButton, backgroundColor: "#2196F3" }}
                 onPress={() => {
                   setModalVisible(!modalVisible);
+                  //funnção do axios pra enviar post request
+                  SendData(pet, price, amount);
                 }}
               >
                 <Text style={styles.textStyle}>Confirmar</Text>
@@ -67,7 +119,7 @@ export default function App() {
             setModalVisible(true);
           }}
         >
-          <Text style={styles.textStyle}>Show Modal</Text>
+          <Text style={styles.textStyle}>Cadastrar compra</Text>
         </TouchableHighlight>
       </View>
     </View>
@@ -93,7 +145,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 35,
     alignItems: "stretch",
-    justifyContent:'space-evenly',
+    justifyContent: "space-evenly",
 
     shadowColor: "#000",
     shadowOffset: {
@@ -105,7 +157,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   openButton: {
-    backgroundColor: "#F194FF",
+    backgroundColor: "#14565c",
     borderRadius: 20,
     padding: 10,
     elevation: 2,
